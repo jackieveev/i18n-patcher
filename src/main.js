@@ -35,19 +35,14 @@ async function translateObjectSource (obj, res, from, to) {
 (async () => {
   program
   .requiredOption('-s, --source <file>', 'source file path')
+  .option('-t, --to <lang list>', 'translate to lang, split by comma, etc. en, ja, th')
+  .option('-f, --from <lang>', 'original lang')
 
   program.parse()
 
   const babelOptions = {
     presets: [
-      [
-        '@babel/preset-env',
-        {
-          targets: {
-            node: 'current'
-          }
-        }
-      ]
+      ['@babel/preset-env', { targets: { node: 'current' } }]
     ]
   }
 
@@ -64,12 +59,18 @@ async function translateObjectSource (obj, res, from, to) {
       console.log('hello')
     }
     const from = options.from || lang.chinese
-    const to = options.to || [lang.japanese]
+    const to = options.to ? options.to.split(',').map(e => e.trim()) : [lang.japanese]
 
     for (let i = 0; i < to.length; i++) {
       const res = {}
-      await translateObjectSource(data, res, from, to)
-      fs.writeFileSync(path.join('./output', to[i] + '.js'), 'export default ' + JSON.stringify(res, undefined, 2))
+      await translateObjectSource(data, res, from, to[i])
+      const outputFile = path.join('./output', to[i] + '.js')
+      // 存在则追加
+      if (fs.existsSync(outputFile)) {
+        
+      } else {
+        fs.writeFileSync(outputFile, 'export default ' + JSON.stringify(res, undefined, 2))
+      }
     }
   } catch (err) {
     console.error(err)
