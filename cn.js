@@ -1,19 +1,35 @@
 export default {
-  edited: '已编辑',
-  useDefaultValue: '恢复到默认值',
-  saveChange: '保存修改',
-  cancelChange: '撤销修改',
-  invalidFile: '文件已损坏或无效的文件类型。',
-  tenantSceneMapName: '租户场景地图',
-  offTime: '机器人关机时间',
-  'offTime-placeholder': '关机时间',
-  offBatteryThreshold: '关机电量阈值',
-  scenePicturesKeys: {
-    cover: '首页',
-    cruise: '巡游中',
-    guide: '引领中',
-    charge: '充电中',
-    missTalk: '对话未命中',
-    hitTalk: '对话命中'
-  }
+  device: '机器人',
+  voiceCall: '语音通话',
+  calling: '正在呼入',
+  corpus: {
+    cover: '命中高频对话Top500',
+    skill: '技能高频问法Top500',
+    unhit: '未命中Top500',
+    sort: '排序',
+    question: '问题',
+    answer: '回答',
+    total: '数量',
+    rate: '比率',
+    technology: '技能',
+  },
+  total: '合计',
+  searchQuestion: '搜索问题',
+  searchAnswer: '搜索答案',
+  searchTitle: '搜索标题',
+  publishStatus: {
+    1: '已发布',
+    0: '未发布'
+  },
+  dataset: '数据集',
+  fileSize: '文件大小',
+  uploadStaff: '上传人员',
+  datasetName: '数据集名称',
+  uploadDataset: '上传数据集',
+  publish: '发布',
+  unpublish: '取消发布',
+  publishConfirm: '确认发布该数据集？',
+  unpublishConfirm: '确认取消发布该数据集？',
+  entityInstance: '事件实体',
+  summarize: '总结'
 }
