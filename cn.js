@@ -21,6 +21,7 @@ export default {
     1: '已发布',
     0: '未发布'
   },
+  testss: '测试一下',
   dataset: '数据集',
   fileSize: '文件大小',
   uploadStaff: '上传人员',

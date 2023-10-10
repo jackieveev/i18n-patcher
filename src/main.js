@@ -7,7 +7,7 @@ const lang = require('./lang')
 
 // 将object的数据源翻译
 async function translateObjectSource (obj, res, from, to, mode) {
-  let raw = ''
+  let raw = {}
   const keys = Object.keys(obj)
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i], item = obj[key]
@@ -23,28 +23,18 @@ async function translateObjectSource (obj, res, from, to, mode) {
     } else if (!res[key] || mode === 'o') {
       // 未翻译或模式为覆盖
       // 已有翻译且模式为追加时不处理
-      raw += item.replace(/\n/g, '') + '\n'
-      res[key] = ''
+      raw[key] = item
     }
   }
-  if (!raw) return
   const translation = await translator(raw, from, to)
+  console.log(translation)
   // 回填数据
-  let n = 0
-  const list = translation.split('\n')
-  // 如果源数据和翻译后的数据条数对不上，就要修剪翻译后的数据
-  // 这个问题是因为翻译后的数据人为添加了数据导致跟源数据对不上
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i]
-    // if (key !== Object.keys(res)[i]) {
-    //   delete res[Object.keys(res)[i]]
-    // }
-    if (typeof obj[key] === 'object') continue
-    console.log('@@@', key, res[key], list[n])
-    // 翻译词条已经填完
-    if (list[n] === undefined) break
-    res[key] = list[n]
-    n++
+  const tKeys = Object.keys(translation)
+  for (let i = 0; i < tKeys.length; i++) {
+    const key = tKeys[i]
+    if (!res[key] || mode === 'o') {
+      res[key] = translation[key]
+    }
   }
 }
 

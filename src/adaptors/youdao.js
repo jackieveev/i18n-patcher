@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer')
-const pip = require('../pipline')
 const bing = require('./bing')
+const lang = require('../lang')
 
 const map = {
   zh: 'zh-CHS'
@@ -10,13 +10,14 @@ function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+
 async function translate (raw, from, to) {
   // 有道没有转繁体，借助bing的
   if (to === 'cht') return bing(raw, from, to)
-  let browser, ret
+  let browser, ret = {}, page, inputEle
   try {
-    browser = await puppeteer.launch({ headless: true })
-    const page = await browser.newPage()
+    browser = await puppeteer.launch({ headless: false })
+    page = await browser.newPage()
     await page.goto('https://fanyi.youdao.com/')
 
     const fromBtn = '.languageSelector.languageSelector-web'
@@ -31,28 +32,37 @@ async function translate (raw, from, to) {
     await page.waitForSelector('.languageInterface')
     await page.click(`div[data-code="${map[to] || to}"]`)
     await page.waitForSelector('#js_fanyi_input')
-    const inputEle = await page.$('#js_fanyi_input')
-    await page.evaluate((input, text) => {
-      input.textContent = text
-    }, inputEle, raw)
-    await page.type('#js_fanyi_input', ' ')
-    await page.keyboard.press('Backspace')
-    await page.waitForSelector('#js_fanyi_output_resultOutput')
-    const res = await page.$('#js_fanyi_output_resultOutput')
-    ret = await page.evaluate(el => el.textContent, res)
+    inputEle = await page.$('#js_fanyi_input')
+    
+    const keys = Object.keys(raw)
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      await page.evaluate((input, text) => {
+        input.textContent = text
+      }, inputEle, raw[key])
+
+      await page.type('#js_fanyi_input', ' ')
+      await page.keyboard.press('Backspace')
+      await page.waitForResponse(response => response.url().includes('https://dict.youdao.com/webtranslate'))
+      await sleep(100)
+      await page.waitForSelector('#js_fanyi_output_resultOutput')
+      const res = await page.$('#js_fanyi_output_resultOutput')
+      let text = await page.evaluate(el => el.textContent, res)
+      if (to === lang.english) {
+        text = text.charAt(0).toUpperCase() + text.slice(1)
+      }
+      ret[key] = text
+    }
+
   } catch (err) {
     console.log('发生错误：', err)
     console.log('正在重试')
-    ret = translate(raw, from, to)
+    return translate(raw, from, to)
   }
+
+    
   browser && browser.close()
   return ret
 }
 
-// 单段翻译字数限制
-const LIMIT = 4999
-
-// 将字符用百度翻译成目标语言
-module.exports = async function translator (raw, from, to) {
-  return await pip(raw, translate, LIMIT, from, to)
-}
+module.exports = translate
