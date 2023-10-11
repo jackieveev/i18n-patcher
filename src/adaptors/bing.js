@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer')
-const pip = require('../pipline')
+const lang = require('../lang')
+const { upperCaseFirstChar } = require('../helpers')
 
 const map = {
   zh: 'zh-Hans',
@@ -10,12 +11,30 @@ function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// TODO 加超时重试机制和其他容错
+async function t (page, inputEle, src, to) {
+  await page.evaluate((input) => {
+    input.value = ''
+  }, inputEle)
+  await page.type('#tta_input_ta', src)
+
+  const response = await page.waitForResponse(
+    response => response.url().includes('https://cn.bing.com/ttranslatev3'),
+    { timeout: 3000 }
+  )
+  const res = await response.json()
+  let text = res[0]?.translations[0]?.text
+  if (!text) throw new Error('翻译返回错误')
+  if (to === lang.english) {
+    text = upperCaseFirstChar(text)
+  }
+  return text
+}
+
 async function translate (raw, from, to) {
-  let browser
+  let browser, ret = {}, page, inputEle
   try {
     browser = await puppeteer.launch({ headless: true })
-    const page = await browser.newPage()
+    page = await browser.newPage()
     await page.goto('https://cn.bing.com/translator')
 
     await page.waitForSelector('#tta_srcsl')
@@ -26,31 +45,39 @@ async function translate (raw, from, to) {
     await page.select('#tta_tgtsl', map[to] || to)
 
     await page.waitForSelector('#tta_input_ta')
-    const inputEle = await page.$('#tta_input_ta')
-    await page.evaluate((input, text) => {
-      input.value = text
-    }, inputEle, raw)
-    await page.type('#tta_input_ta', ' ')
-    await page.keyboard.press('Backspace')
+    inputEle = await page.$('#tta_input_ta')
 
-    await page.waitForSelector('#tta_output_ta.tta_output_hastxt')
-    await page.waitForFunction('document.getElementById("tta_output_ta").value != " ..."')
-    const res = await page.$('#tta_output_ta.tta_output_hastxt')
-    const text = await page.evaluate(el => el.value, res)
-    browser.close()
-    return text
+    const keys = Object.keys(raw)
+    let i = 0
+    while (i < keys.length) {
+      const key = keys[i]
+      if (!raw[key] || /^\s+$/g.test(raw[key])) {
+        ret[key] = ''
+      } else {
+        try {
+          ret[key] = await t(page, inputEle, raw[key], to)
+        } catch (err) {
+          console.log('翻译字条错误：', key, ' 原内容：', raw[key])
+          console.log(err)
+          console.log('正在重试')
+          // 随便翻译一条
+          await t(page, inputEle, Date.now().toString(), to)
+          continue
+        }
+      }
+      i++
+    }
+
   } catch (err) {
     console.log('发生错误：', err)
     console.log('正在重试')
-    browser && browser.close()
+    
     return translate(raw, from, to)
   }
-}
 
-// 单段翻译字数限制
-const LIMIT = 2000
+  browser && browser.close()
+  return ret
+}
 
 // 将字符用百度翻译成目标语言
-module.exports = async function translator (raw, from, to) {
-  return await pip(raw, translate, LIMIT, from, to)
-}
+module.exports = translate

@@ -2,6 +2,7 @@ export default {
   device: '机器人',
   voiceCall: '语音通话',
   calling: '正在呼入',
+  account: '账户',
   corpus: {
     cover: '命中高频对话Top500',
     skill: '技能高频问法Top500',
@@ -13,24 +14,4 @@ export default {
     rate: '比率',
     technology: '技能',
   },
-  total: '合计',
-  searchQuestion: '搜索问题',
-  searchAnswer: '搜索答案',
-  searchTitle: '搜索标题',
-  publishStatus: {
-    1: '已发布',
-    0: '未发布'
-  },
-  testss: '测试一下',
-  dataset: '数据集',
-  fileSize: '文件大小',
-  uploadStaff: '上传人员',
-  datasetName: '数据集名称',
-  uploadDataset: '上传数据集',
-  publish: '发布',
-  unpublish: '取消发布',
-  publishConfirm: '确认发布该数据集？',
-  unpublishConfirm: '确认取消发布该数据集？',
-  entityInstance: '事件实体',
-  summarize: '总结'
 }

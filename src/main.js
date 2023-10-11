@@ -2,8 +2,9 @@ const { program } = require('commander')
 const path = require('path')
 const fs = require('fs')
 const babel = require('@babel/core')
-const translator = require('./adaptors/youdao')
 const lang = require('./lang')
+
+let translator
 
 // 将object的数据源翻译
 async function translateObjectSource (obj, res, from, to, mode) {
@@ -20,19 +21,19 @@ async function translateObjectSource (obj, res, from, to, mode) {
         res[key] = child
       }
       await translateObjectSource(item, child, from, to, mode)
-    } else if (!res[key] || mode === 'o') {
-      // 未翻译或模式为覆盖
+    } else if (!res[key] || mode === 'o' || mode === 'd') {
+      // 未翻译或模式为覆盖、差异
       // 已有翻译且模式为追加时不处理
       raw[key] = item
     }
   }
   const translation = await translator(raw, from, to)
-  console.log(translation)
   // 回填数据
   const tKeys = Object.keys(translation)
   for (let i = 0; i < tKeys.length; i++) {
     const key = tKeys[i]
-    if (!res[key] || mode === 'o') {
+    // 无值，模式为覆盖，模式为差异且值不同时
+    if (!res[key] || mode === 'o' || (mode === 'd' && res[key] !== translation[key])) {
       res[key] = translation[key]
     }
   }
@@ -54,18 +55,22 @@ function getJSFileData (path) {
   .requiredOption('-s, --source <file>', 'source file path')
   .option('-t, --to <lang list>', 'translate to lang, split by comma, etc. en, ja, th', lang.english)
   .option('-f, --from <lang>', 'original lang', lang.chinese)
-  .option('-m, --mode <mode>', 'patch mode: a(append) | o(overwrite)', 'a')
+  .option('-m, --mode <mode>', 'patch mode: a(append) | o(overwrite) | d(diff)', 'a')
+  .option('--overwrite <boolean>', 'overwrite origin file')
+  .option('--adaptor <adaption>', 'specify translate adaptor', 'youdao')
 
   program.parse()
 
   const options = program.opts()
+  const source = program.args[0]
   try {
-    const ext = path.extname(options.source)
+    translator = require('./adaptors/' + options.adaptor)
+    const ext = path.extname(source)
     let data = {}
     if (ext === '.js') {
-      data = getJSFileData(options.source)
+      data = getJSFileData(source)
     } else if (ext === '.json') {
-      console.log('hello')
+      data = require(source)
     }
     const from = options.from,
         to = options.to.split(',').map(e => e.trim()),
