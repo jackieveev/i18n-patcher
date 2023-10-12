@@ -17,8 +17,5 @@
     "@babel/preset-env": "^7.22.20",
     "commander": "^11.0.0",
     "puppeteer": "^19.0.0"
-  },
-  "devDependencies": {
-    "i18n-patcher": "github:jackieveev/i18n-patcher"
   }
 }
