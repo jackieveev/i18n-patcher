@@ -52,12 +52,14 @@ function getJSFileData (path) {
 
 (async () => {
   program
-  .requiredOption('-s, --source <file>', 'source file path')
   .option('-t, --to <lang list>', 'translate to lang, split by comma, etc. en, ja, th', lang.english)
   .option('-f, --from <lang>', 'original lang', lang.chinese)
   .option('-m, --mode <mode>', 'patch mode: a(append) | o(overwrite) | d(diff)', 'a')
+  .option('-o, --output <path>', 'output file directory', '.')
   .option('--overwrite <boolean>', 'overwrite origin file')
   .option('--adaptor <adaption>', 'specify translate adaptor', 'youdao')
+  .option('--format <file format>', 'js|json', 'js')
+  .option('--jsmodule <format>', 'es|cjs', 'es')
 
   program.parse()
 
@@ -70,7 +72,7 @@ function getJSFileData (path) {
     if (ext === '.js') {
       data = getJSFileData(source)
     } else if (ext === '.json') {
-      data = require(source)
+      data = require(path.resolve(source))
     }
     const from = options.from,
         to = options.to.split(',').map(e => e.trim()),
@@ -78,13 +80,17 @@ function getJSFileData (path) {
 
     for (let i = 0; i < to.length; i++) {
       let res = {}
-      const outputFile = path.join('./output', to[i] + '.js')
+      const outputFile = path.resolve(path.join(options.output, to[i] + '.' + options.format))
       // 存在则追加
       if (fs.existsSync(outputFile)) {
         res = getJSFileData(outputFile)
       }
       await translateObjectSource(data, res, from, to[i], mode)
-      fs.writeFileSync(outputFile, 'export default ' + JSON.stringify(res, undefined, 2))
+      let prefix = ''
+      if (options.format === 'js') {
+        prefix = options.jsModule === 'es' ? 'export default ' : 'module.exports = '
+      }
+      fs.writeFileSync(outputFile, prefix + JSON.stringify(res, undefined, 2))
     }
   } catch (err) {
     console.error(err)

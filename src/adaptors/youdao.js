@@ -1,7 +1,8 @@
 const puppeteer = require('puppeteer')
 const bing = require('./bing')
 const lang = require('../lang')
-const { upperCaseFirstChar } = require('../helpers')
+const path = require('path')
+const { upperCaseFirstChar, formatDate } = require('../helpers')
 
 const map = {
   zh: 'zh-CHS'
@@ -19,9 +20,8 @@ async function t (page, inputEle, src, to) {
   await page.type('#js_fanyi_input', src)
   await page.waitForResponse(
     response => response.url().includes('https://dict.youdao.com/webtranslate'),
-    { timeout: 3000 }
   )
-  await page.waitForSelector('#js_fanyi_output_resultOutput', { timeout: 3000 })
+  await page.waitForSelector('#js_fanyi_output_resultOutput')
   const res = await page.$('#js_fanyi_output_resultOutput')
   let text = await page.evaluate(el => el.textContent, res)
   if (to === lang.english) {
@@ -36,9 +36,16 @@ async function translate (raw, from, to) {
   if (to === 'cht') return bing(raw, from, to)
   let browser, ret = {}, page, inputEle
   try {
-    browser = await puppeteer.launch({ headless: true })
+    browser = await puppeteer.launch({ headless: false })
     page = await browser.newPage()
-    await page.goto('https://fanyi.youdao.com/')
+    page.setDefaultTimeout(300000)
+    await page.goto('https://fanyi.youdao.com/indexLLM.html#/')
+    await page.evaluate(() => {
+      // 确保目标在顶层
+      var app = document.querySelector('#app')
+      app.style.position = 'relative'
+      app.style.zIndex = 2147483647
+    })
 
     const fromBtn = '.languageSelector.languageSelector-web'
     await page.waitForSelector(fromBtn)
@@ -77,6 +84,7 @@ async function translate (raw, from, to) {
   } catch (err) {
     console.log('发生错误：', err)
     console.log('正在重试', raw)
+    // await page.screenshot({ path: path.resolve(`./debug/youdao-${Date.now()}.png`) })
     ret = translate(raw, from, to)
   }
     

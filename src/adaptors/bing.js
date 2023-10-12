@@ -19,7 +19,6 @@ async function t (page, inputEle, src, to) {
 
   const response = await page.waitForResponse(
     response => response.url().includes('https://cn.bing.com/ttranslatev3'),
-    { timeout: 3000 }
   )
   const res = await response.json()
   let text = res[0]?.translations[0]?.text
@@ -35,6 +34,7 @@ async function translate (raw, from, to) {
   try {
     browser = await puppeteer.launch({ headless: true })
     page = await browser.newPage()
+    page.setDefaultTimeout(3000)
     await page.goto('https://cn.bing.com/translator')
 
     await page.waitForSelector('#tta_srcsl')
@@ -71,8 +71,10 @@ async function translate (raw, from, to) {
   } catch (err) {
     console.log('发生错误：', err)
     console.log('正在重试')
+
+    // await page.screenshot({ path: path.resolve(`./debug/bing-${Date.now()}.png`) })
     
-    return translate(raw, from, to)
+    ret = translate(raw, from, to)
   }
 
   browser && browser.close()
