@@ -14,7 +14,7 @@ dependencies:
   puppeteer: 19.11.1
 
 devDependencies:
-  i18n-patcher: github.com/jackieveev/i18n-patcher/09446d7914365f189ff1a0a43e84b17c297a2637
+  i18n-patcher: github.com/jackieveev/i18n-patcher/b740a4d5f72d2167b43fc96f1f715dfc6b4cb4e6
 
 packages:
 
@@ -1791,8 +1791,8 @@ packages:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
 
-  github.com/jackieveev/i18n-patcher/09446d7914365f189ff1a0a43e84b17c297a2637:
-    resolution: {tarball: https://codeload.github.com/jackieveev/i18n-patcher/tar.gz/09446d7914365f189ff1a0a43e84b17c297a2637}
+  github.com/jackieveev/i18n-patcher/b740a4d5f72d2167b43fc96f1f715dfc6b4cb4e6:
+    resolution: {tarball: https://codeload.github.com/jackieveev/i18n-patcher/tar.gz/b740a4d5f72d2167b43fc96f1f715dfc6b4cb4e6}
     name: i18n-patcher
     version: 1.0.0
     dependencies:
