@@ -12,7 +12,7 @@ Options
 |args|direction|
 |---|---|
 |-t, --to <lang list>    |translate to lang, split by comma, etc. en, ja, th (default: "en")|
-|- -f, --from <lang>       |original lang (default: "zh")|
+|-f, --from <lang>       |original lang (default: "zh")|
 |-m, --mode <mode>       |patch mode: a(append) | o(overwrite) | d(diff) (default: "a")
 |-o, --output <path>     |output file directory (default: ".")
 |--overwrite <boolean>   |overwrite origin file
