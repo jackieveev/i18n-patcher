@@ -13,12 +13,12 @@ Options
 |---|---|
 |-t, --to <lang list>    |translate to lang, split by comma, etc. en, ja, th (default: "en")|
 |-f, --from <lang>       |original lang (default: "zh")|
-|-m, --mode <mode>       |patch mode: a(append) | o(overwrite) | d(diff) (default: "a")
+|-m, --mode <mode>       |patch mode: a(append) \| o(overwrite) \| d(diff) (default: "a")
 |-o, --output <path>     |output file directory (default: ".")
 |--overwrite <boolean>   |overwrite origin file
 |--adaptor <adaption>    |specify translate adaptor (default: "youdao")
-|--format <file format>  |js|json (default: "js")
-|--jsmodule <format>     |es\|cjs (default: "es")
+|--format <file format>  |js \| json (default: "js")
+|--jsmodule <format>     |es \| cjs (default: "es")
 |-h, --help              |display help for command
 
 Example
