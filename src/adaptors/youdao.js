@@ -40,14 +40,15 @@ async function translate (raw, from, to) {
     page = await browser.newPage()
     page.setDefaultTimeout(300000)
     await page.goto('https://fanyi.youdao.com/indexLLM.html#/')
+    await page.waitForSelector('.translate-tab-container')
     await page.evaluate(() => {
       // 确保目标在顶层
-      var app = document.querySelector('#app')
+      var app = document.querySelector('.translate-tab-container')
       app.style.position = 'relative'
       app.style.zIndex = 2147483647
     })
 
-    const fromBtn = '.languageSelector.languageSelector-web'
+    const fromBtn = '.lang-container.lanFrom-container'
     await page.waitForSelector(fromBtn)
     await page.click(fromBtn)
     await page.waitForSelector('.languageInterface')
