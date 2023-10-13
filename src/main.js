@@ -88,7 +88,7 @@ function getJSFileData (path) {
       await translateObjectSource(data, res, from, to[i], mode)
       let prefix = ''
       if (options.format === 'js') {
-        prefix = options.jsModule === 'es' ? 'export default ' : 'module.exports = '
+        prefix = options.jsmodule === 'es' ? 'export default ' : 'module.exports = '
       }
       fs.writeFileSync(outputFile, prefix + JSON.stringify(res, undefined, 2))
     }
